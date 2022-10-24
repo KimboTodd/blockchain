@@ -5,6 +5,9 @@ partial class Board : ComponentBase
     private const int Size = 7;
 
     [Parameter]
+    public bool IsGameOver { get; set; }
+
+    [Parameter]
     public Cell? CurrentBlock { get; set; }
 
     Cell[,] Cells { get; set; } = new Cell[Size, Size];
@@ -20,16 +23,25 @@ partial class Board : ComponentBase
         }
     }
 
-    internal async Task<int> DropInAsync(Cell currentBlock)
+    internal async Task<int> DropInAsync(Cell current)
     {
-        if (currentBlock is null)
-        {
-            return 0;
-        }
+        if (current is null) { return 0; }
 
-        while (currentBlock.Row > 1)
+        while (current.Row > 1)
         {
-            currentBlock.Row -= 1;
+            // TODO: should the CanDrop be a method called from the game and the 
+            // board can remain ignorant of the game state?
+            // Can if move down? 
+            if (Cells[6, current.Column] is null)
+            {
+                Console.WriteLine("Game Over");
+                IsGameOver = true;
+                return 0;
+            }
+
+            current.Row -= 1;
+            Cells[current.Row, current.Column] = current;
+
             await Task.Delay(20);
         }
 
