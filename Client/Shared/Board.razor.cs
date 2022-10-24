@@ -5,15 +5,9 @@ partial class Board : ComponentBase
     private const int Size = 7;
 
     [Parameter]
-    public bool IsPlaying { get; set; }
+    public Cell? CurrentBlock { get; set; }
 
-    Cell[,] ArrayCells { get; set; } = new Cell[Size, Size];
-
-    void Start()
-    {
-
-        IsPlaying = true;
-    }
+    Cell[,] Cells { get; set; } = new Cell[Size, Size];
 
     protected override void OnInitialized()
     {
@@ -21,10 +15,30 @@ partial class Board : ComponentBase
         {
             for (int j = 0; j < Size; j++)
             {
-                ArrayCells[i, j] = new();
+                Cells[i, j] = new();
             }
-
         }
+    }
+
+    internal async Task<int> DropInAsync(Cell currentBlock)
+    {
+        if (currentBlock is null)
+        {
+            return 0;
+        }
+
+        while (currentBlock.Row > 1)
+        {
+            currentBlock.Row -= 1;
+            await Task.Delay(20);
+        }
+
+        return Score();
+    }
+
+    private int Score()
+    {
+        return 1;
     }
 }
 

@@ -1,31 +1,31 @@
 ﻿@namespace Blockchain.Client.Shared
 
-<h5>Is playing: @IsPlaying</h5>
-
-@if(IsPlaying == false)
-{
-    <button @onclick="Start">Start</button>
-}
-
 <table class="table" tabindex="0">
-    @* Loop through rows top to bottom *@
     <thead>
         <tr>
-            @for (int i = 1; i <= ArrayCells.GetLength(0); i++)
+            @for (int i = 1; i <= Cells.GetLength(0); i++)
             {
-                <th scope="col">@i</th>
+                if(CurrentBlock?.Column == i)
+                {
+                    <th scope="col">@CurrentBlock.DisplayNumber</th>
+                }
+                else 
+                {
+                    <th scope="col">-</th>
+                }
             }
         </tr>
     </thead>
 
     <tbody>
-        @for (int i = ArrayCells.GetLength(0) - 1; i >= 1; i--)
+        @* Loop through rows top to bottom *@
+        @for (int i = Cells.GetLength(0) - 1; i >= 0; i--)
         {
             @* Loop through columns left to right *@
             <tr>
-                @for (int j = 0; j <= ArrayCells.GetUpperBound(1); j++)
+                @for (int j = 0; j <= Cells.GetUpperBound(1); j++)
                 {
-                    <Cell Number=@ArrayCells[@i,@j].Number />
+                    <Cell CellParameter="@Cells[@i,@j]" /> 
                 }
             </tr>
         }
