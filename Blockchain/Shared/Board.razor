@@ -1,0 +1,35 @@
+﻿@namespace Blockchain.Shared
+
+<table class="table" tabindex="0">
+    <thead>
+        <tr>
+            @for (int i = 1; i <= Cells.GetLength(0); i++)
+            {
+                if(CurrentBlock?.Column == i)
+                {
+                    <th scope="col">@CurrentBlock.DisplayNumber</th>
+                }
+                else 
+                {
+                    <th scope="col">-</th>
+                }
+            }
+        </tr>
+    </thead>
+
+    <tbody>
+        @* Loop through rows top to bottom *@
+        @for (int i = Cells.GetLength(0) - 1; i >= 0; i--)
+        {
+            @* Loop through columns left to right *@
+            <tr>
+                @for (int j = 0; j <= Cells.GetUpperBound(1); j++)
+                {
+                    Console.WriteLine($"{@Cells[@i,@j].Number} here is the thing");
+
+                    <Cell CellParameter="@Cells[@i,@j]" /> 
+                }
+            </tr>
+        }
+    </tbody>
+</table>

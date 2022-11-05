@@ -6,9 +6,9 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/Maestro/bin/Debug/net6.0/Maestro.dll",
+      "program": "${workspaceFolder}/Blockchain/bin/Debug/net6.0/Blockchain.dll",
       "args": [],
-      "cwd": "${workspaceFolder}/Maestro",
+      "cwd": "${workspaceFolder}/Blockchain",
       "stopAtEntry": false,
       "serverReadyAction": {
         "action": "openExternally",
