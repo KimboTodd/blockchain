@@ -4,7 +4,7 @@ namespace Blockchain.Client.Shared;
 partial class Game : ComponentBase
 {
     bool IsPlaying { get; set; } = false;
-    
+
     // TODO: this should come from board
     bool IsGameOver { get; set; } = false;
     public Cell? CurrentBlock { get; private set; }
@@ -26,7 +26,7 @@ partial class Game : ComponentBase
     {
         var rand = new Random(DateTime.Now.Millisecond);
         var number = rand.Next(1, 8);
-        return new Cell(8, 4) { Number = number };
+        return new Cell(7, 4) { Number = number };
     }
 
     protected async Task KeyDown(KeyboardEventArgs e)

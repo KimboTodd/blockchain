@@ -14,11 +14,12 @@ partial class Board : ComponentBase
 
     protected override void OnInitialized()
     {
+        Console.WriteLine("IN on initialized");
         for (int i = 0; i < Size; i++)
         {
             for (int j = 0; j < Size; j++)
             {
-                Cells[i, j] = new();
+                Cells[i, j] = new Cell(i, j);
             }
         }
     }
@@ -27,22 +28,36 @@ partial class Board : ComponentBase
     {
         if (current is null) { return 0; }
 
+        if (Cells[6, current.Column] is not null)
+        {
+            Console.WriteLine("Game Over");
+            IsGameOver = true;
+            return 0;
+        }
+
         while (current.Row > 1)
         {
             // TODO: should the CanDrop be a method called from the game and the 
             // board can remain ignorant of the game state?
-            // Can if move down? 
-            if (Cells[6, current.Column] is null)
+
+            var cellBelow = Cells[current.Row - 1, current.Column];
+            if (cellBelow is null)
             {
-                Console.WriteLine("Game Over");
-                IsGameOver = true;
-                return 0;
+                if (current.Row != 6)
+                {
+                    Cells[6, current.Column] = new Cell();
+                }
+
+                current.Row = current.Row - 1;
+                Console.WriteLine($"{current.DisplayNumber} display number, {current.Row} current row");
+
+                Cells[current.Row, current.Column].Number = current.Number;
+                Console.WriteLine(Cells[current.Row, current.Column].DisplayNumber);
             }
 
-            current.Row -= 1;
-            Cells[current.Row, current.Column] = current;
+            // StateHasChanged();
+            await Task.Delay(40);
 
-            await Task.Delay(20);
         }
 
         return Score();

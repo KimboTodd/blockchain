@@ -25,6 +25,8 @@
             <tr>
                 @for (int j = 0; j <= Cells.GetUpperBound(1); j++)
                 {
+                    Console.WriteLine($"{@Cells[@i,@j].Number} here is the thing");
+
                     <Cell CellParameter="@Cells[@i,@j]" /> 
                 }
             </tr>

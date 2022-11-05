@@ -15,7 +15,7 @@ partial class Cell : ComponentBase
     {
     }
 
-    public int Number { get; set; }
+    public int Number { get; set; } = 0;
     public string DisplayNumber => Number.ToString();
     public int Row { get; set; }
     public int Column { get; set; }
@@ -23,6 +23,7 @@ partial class Cell : ComponentBase
 
     protected override void OnInitialized()
     {
+        Console.WriteLine($"{CellParameter.Number} cell parameter");
         if (CellParameter is not null)
         {
             Number = CellParameter.Number;
