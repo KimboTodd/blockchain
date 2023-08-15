@@ -11,10 +11,14 @@ partial class Link : ComponentBase
     [Parameter]
     public int? Number { get; set; }
 
-    public Link(int row, int column)
+    [Parameter]
+    public bool? Scored { get; set; }
+
+    public Link(int row, int column, int number)
     {
         Row = row;
         Column = column;
+        Number = number;
     }
 
     public Link()
@@ -35,12 +39,17 @@ partial class Link : ComponentBase
     // }
 
     public string DisplayNumber => Number?.ToString() ?? string.Empty;
+
     public int Row { get; set; }
+
     public int Column { get; set; }
 
     protected override void OnInitialized()
     {
-        if (CellParameter is null) return;
+        if (CellParameter is null)
+        {
+            return;
+        }
 
         Row = CellParameter.Row;
         Column = CellParameter.Column;

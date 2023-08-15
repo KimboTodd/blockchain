@@ -10,9 +10,9 @@
     {
         <h5>Score: @Score</h5>
 
-        <h5>Next: @NextLink?.DisplayNumber</h5>
+        <h5>Next: @NextNumber.ToString()</h5>
 
-        <h5>Current: @CurrentBlock?.DisplayNumber</h5>
+        <h5>Current: @CurrentLink?.DisplayNumber</h5>
     }
 
     @if (IsGameOver == true)
@@ -25,9 +25,9 @@
         <tr>
             @for (var i = 0; i <= Cells.GetLength(0); i++)
             {
-                if (CurrentBlock?.Column == i && CurrentBlock?.Row == 7)
+                if (CurrentLink?.Column == i && CurrentLink?.Row == 7)
                 {
-                    <th scope="col">@CurrentBlock.DisplayNumber</th>
+                    <th scope="col">@CurrentLink.DisplayNumber</th>
                 }
                 else
                 {
@@ -47,7 +47,7 @@
                 {
                     @if (Cells[i, j]?.Number is not null)
                     {
-                        <Link Number="@Cells[i, j]?.Number"/>
+                        <Link Number="@Cells[i, j]?.Number" Scored="@Cells[i, j]?.Scored"/>
                     }
                     else
                     {

@@ -2,24 +2,26 @@
 
 partial class Game : ComponentBase
 {
-    private bool IsPlaying { get; set; } = false;
-
-    private bool IsGameOver { get; set; } = false;
-
-    private Link? CurrentBlock { get; set; }
-
-    public Link? NextLink { get; private set; }
+    public int? NextNumber { get; private set; }
 
     public int Score { get; private set; }
 
     public bool droppingAnimation { get; set; }
+
+    private bool IsPlaying { get; set; } = false;
+
+    private bool IsGameOver { get; set; } = false;
+
+    private Link? CurrentLink { get; set; }
+
+    private const int IMPOSSIBLE_NUMBER = 8;
 
     private void Start()
     {
         Score = 0;
         IsPlaying = true;
         IsGameOver = false;
-        NextLink = GenerateLink();
+        NextNumber = GenerateNumber();
 
         GameLoop();
     }
@@ -31,19 +33,26 @@ partial class Game : ComponentBase
         // if this would collide, game over
         // HandleBlockedRow
 
-        CurrentBlock = NextLink;
-        NextLink = GenerateLink();
+        // TODO: figure out what's going on with the link not displaying
+        var thing = new Link(7, 4, NextNumber ?? IMPOSSIBLE_NUMBER);
+        Console.WriteLine($"Current link: {thing.DisplayNumber}");
+        CurrentLink = thing;
+        var next = GenerateNumber();
+        Console.WriteLine($"Next: {next}");
+        NextNumber = next;
+        StateHasChanged();
     }
 
-    private static Link GenerateLink()
+    private static int GenerateNumber()
     {
-        var number = new Random(DateTime.Now.Millisecond).Next(1, 8);
-        return new Link(7, 4) { Number = number };
+        return new Random(DateTime.Now.Millisecond).Next(1, 2);
+
+        // return new Random(DateTime.Now.Millisecond).Next(1, 8);
     }
 
     private async Task KeyDown(KeyboardEventArgs e)
     {
-        if (IsPlaying is false || CurrentBlock is null)
+        if (IsPlaying is false || CurrentLink is null)
         {
             return;
         }
@@ -51,44 +60,53 @@ partial class Game : ComponentBase
         switch (e.Key)
         {
             case "ArrowRight":
-                CurrentBlock.Column = CurrentBlock.Column >= 6
+                if (droppingAnimation)
+                {
+                    return;
+                }
+
+                CurrentLink.Column = CurrentLink.Column >= 6
                     ? 6
-                    : CurrentBlock.Column += 1;
+                    : CurrentLink.Column += 1;
                 StateHasChanged();
                 break;
             case "ArrowLeft":
-                CurrentBlock.Column = CurrentBlock.Column <= 0
+                if (droppingAnimation)
+                {
+                    return;
+                }
+
+                CurrentLink.Column = CurrentLink.Column <= 0
                     ? 0
-                    : CurrentBlock.Column -= 1;
+                    : CurrentLink.Column -= 1;
                 StateHasChanged();
                 break;
             case "ArrowDown":
             case " ":
-                // CurrentBlock.Row -= 1;
-                // Cells[1, 2] = CurrentBlock;
-                // StateHasChanged();
+                if (droppingAnimation)
+                {
+                    return;
+                }
+
                 await HandleDropAsync();
                 break;
-            // case "m":
-            //     await ToggleAudio();
-            //     break;
         }
     }
 
     private async Task HandleDropAsync()
     {
-        if (IsPlaying is false || CurrentBlock is null)
+        if (IsPlaying is false || CurrentLink is null)
         {
             return;
         }
 
         droppingAnimation = true;
 
-        var additionalScore = await DropInAsync(CurrentBlock);
+        var additionalScore = await DropInAsync(CurrentLink);
         // consider changing this to an event to score as we go, might be more exciting
         Score += additionalScore;
 
-        droppingAnimation = true;
+        droppingAnimation = false;
 
         GameLoop();
     }
@@ -97,38 +115,31 @@ partial class Game : ComponentBase
 
     private Link?[,] Cells { get; set; } = new Link[Size, Size];
 
-    protected override void OnInitialized()
-    {
-        // for (var i = 0; i < Size; i++)
-        // for (var j = 0; j < Size; j++)
-        //     Cells[i, j] = new Link(i, j);
-    }
-
     private async Task<int> DropInAsync(Link current)
     {
-        if (IsPlaying is false || CurrentBlock is null)
+        if (IsPlaying is false || CurrentLink is null)
         {
             return 0;
         }
 
-        if (Cells[6, CurrentBlock.Column] is not null)
+        if (Cells[6, CurrentLink.Column] is not null)
         {
             IsGameOver = true;
             return 0;
         }
 
-        while (CurrentBlock.Row > 0)
+        while (CurrentLink.Row > 0)
         {
-            if (Cells[CurrentBlock.Row - 1, CurrentBlock.Column] is null || Cells[CurrentBlock.Row - 1, CurrentBlock.Column]?.DisplayNumber is null)
+            if (Cells[CurrentLink.Row - 1, CurrentLink.Column] is null || Cells[CurrentLink.Row - 1, CurrentLink.Column]?.DisplayNumber is null)
             {
-                if (CurrentBlock.Row != 7)
+                if (CurrentLink.Row != 7)
                 {
-                    Cells[CurrentBlock.Row, CurrentBlock.Column] = null;
+                    Cells[CurrentLink.Row, CurrentLink.Column] = null;
                 }
 
-                CurrentBlock.Row -= 1;
+                CurrentLink.Row -= 1;
 
-                Cells[CurrentBlock.Row, CurrentBlock.Column] = CurrentBlock;
+                Cells[CurrentLink.Row, CurrentLink.Column] = CurrentLink;
             }
 
             StateHasChanged();
@@ -139,10 +150,22 @@ partial class Game : ComponentBase
         while (score > 0)
         {
             // delay to give animation time to play
-            await Task.Delay(50);
+            await Task.Delay(200);
+
             // remove all links that scored in cells
+            for (var i = 0; i < Cells.GetLength(0); i++)
+            {
+                for (var j = 0; j < Cells.GetUpperBound(1); j++)
+                {
+                    if (Cells[i, j]?.Scored is true)
+                    {
+                        Cells[i, j] = null;
+                    }
+                }
+            }
 
             // drop all links by 1 row until no more links can drop
+
 
             score = scoreLinks();
         }
@@ -153,10 +176,56 @@ partial class Game : ComponentBase
     private int scoreLinks()
     {
         var linksBroken = 0;
-        // for all consecutive chains in a column linksBroken++
-        // mark this cell as scored
-        // for all consecutive chains in a row linksBroken++
-        // mark this cell as scored
+        // Loop through rows left to right scanning horizontally for consecutive filled chains
+        for (var i = 0; i < Cells.GetLength(0); i++)
+        {
+            int? chainStart = null;
+            int? chainEnd = null;
+            for (var j = 0; j < Cells.GetUpperBound(1); j++)
+                // if we encounter a filled cell
+            {
+                if (Cells[i, j] is not null)
+                {
+                    // if chain start is null, set it to this cell index
+                    if (chainStart is null)
+                    {
+                        chainStart = j;
+                    }
+                    // else if chain start is not null, increment the end of the chain marker
+                    else if (chainEnd is not null)
+                    {
+                        chainEnd = j;
+                    }
+                }
+                else
+                {
+                    // we have encountered an empty cell
+                    // if chain start is not null, we have found the end of the chain
+                    if (chainStart is not null)
+                    {
+                        chainEnd = j;
+                        var consecutiveChainLength = chainEnd - chainStart;
+                        // traverse this chain from chainStart to chainEnd
+                        for (var k = chainStart.GetValueOrDefault(); k < chainEnd; k++)
+                        {
+                            // and mark any cels within that number == consecutiveChainLength as scored
+                            if (Cells[i, k].Number == consecutiveChainLength)
+                            {
+                                Cells[i, k].Scored = true;
+                                linksBroken++;
+                            }
+                        }
+
+                        // reset chain start and end to null
+                        chainStart = null;
+                        chainEnd = null;
+                    }
+                }
+            }
+
+            // Loop through columns top to bottom scanning vertically for consecutive filled cells
+        }
+
         return linksBroken;
     }
 }
