@@ -2,68 +2,161 @@
 
 partial class Game : ComponentBase
 {
-    bool IsPlaying { get; set; } = false;
+    private bool IsPlaying { get; set; } = false;
 
-    // TODO: this should come from board
-    bool IsGameOver { get; set; } = false;
-    public Cell? CurrentBlock { get; private set; }
-    public Cell? NextBlock { get; private set; }
-    Board Board { get; set; } = new();
+    private bool IsGameOver { get; set; } = false;
+
+    private Link? CurrentBlock { get; set; }
+
+    public Link? NextLink { get; private set; }
+
     public int Score { get; private set; }
 
-    void Start()
+    public bool droppingAnimation { get; set; }
+
+    private void Start()
     {
         Score = 0;
-
         IsPlaying = true;
+        IsGameOver = false;
+        NextLink = GenerateLink();
 
-        CurrentBlock = GenerateCell();
-        NextBlock = GenerateCell();
+        GameLoop();
     }
 
-    private static Cell GenerateCell()
+    private void GameLoop()
     {
-        var rand = new Random(DateTime.Now.Millisecond);
-        var number = rand.Next(1, 8);
-        return new Cell(7, 4) { Number = number };
+        // if we have dropped 7 links,
+        // add a new row to the bottom,
+        // if this would collide, game over
+        // HandleBlockedRow
+
+        CurrentBlock = NextLink;
+        NextLink = GenerateLink();
     }
 
-    protected async Task KeyDown(KeyboardEventArgs e)
+    private static Link GenerateLink()
     {
-        if (IsPlaying is false || CurrentBlock is null) { return; }
+        var number = new Random(DateTime.Now.Millisecond).Next(1, 8);
+        return new Link(7, 4) { Number = number };
+    }
+
+    private async Task KeyDown(KeyboardEventArgs e)
+    {
+        if (IsPlaying is false || CurrentBlock is null)
+        {
+            return;
+        }
 
         switch (e.Key)
         {
             case "ArrowRight":
-                CurrentBlock.Column = CurrentBlock.Column >= 7
-                ? 7
-                : CurrentBlock.Column += 1;
+                CurrentBlock.Column = CurrentBlock.Column >= 6
+                    ? 6
+                    : CurrentBlock.Column += 1;
+                StateHasChanged();
                 break;
             case "ArrowLeft":
-                CurrentBlock.Column = CurrentBlock.Column <= 1
-                ? 1
-                : CurrentBlock.Column -= 1;
+                CurrentBlock.Column = CurrentBlock.Column <= 0
+                    ? 0
+                    : CurrentBlock.Column -= 1;
+                StateHasChanged();
                 break;
             case "ArrowDown":
             case " ":
+                // CurrentBlock.Row -= 1;
+                // Cells[1, 2] = CurrentBlock;
+                // StateHasChanged();
                 await HandleDropAsync();
                 break;
             // case "m":
             //     await ToggleAudio();
             //     break;
-            default:
-                break;
         }
     }
 
     private async Task HandleDropAsync()
     {
-        if (IsPlaying is false || CurrentBlock is null) { return; }
+        if (IsPlaying is false || CurrentBlock is null)
+        {
+            return;
+        }
 
-        var additionalScore = await Board.DropInAsync(CurrentBlock);
+        droppingAnimation = true;
+
+        var additionalScore = await DropInAsync(CurrentBlock);
+        // consider changing this to an event to score as we go, might be more exciting
         Score += additionalScore;
 
-        CurrentBlock = GenerateCell();
-        NextBlock = GenerateCell();
+        droppingAnimation = true;
+
+        GameLoop();
+    }
+
+    private const int Size = 7;
+
+    private Link?[,] Cells { get; set; } = new Link[Size, Size];
+
+    protected override void OnInitialized()
+    {
+        // for (var i = 0; i < Size; i++)
+        // for (var j = 0; j < Size; j++)
+        //     Cells[i, j] = new Link(i, j);
+    }
+
+    private async Task<int> DropInAsync(Link current)
+    {
+        if (IsPlaying is false || CurrentBlock is null)
+        {
+            return 0;
+        }
+
+        if (Cells[6, CurrentBlock.Column] is not null)
+        {
+            IsGameOver = true;
+            return 0;
+        }
+
+        while (CurrentBlock.Row > 0)
+        {
+            if (Cells[CurrentBlock.Row - 1, CurrentBlock.Column] is null || Cells[CurrentBlock.Row - 1, CurrentBlock.Column]?.DisplayNumber is null)
+            {
+                if (CurrentBlock.Row != 7)
+                {
+                    Cells[CurrentBlock.Row, CurrentBlock.Column] = null;
+                }
+
+                CurrentBlock.Row -= 1;
+
+                Cells[CurrentBlock.Row, CurrentBlock.Column] = CurrentBlock;
+            }
+
+            StateHasChanged();
+            await Task.Delay(50);
+        }
+
+        var score = scoreLinks();
+        while (score > 0)
+        {
+            // delay to give animation time to play
+            await Task.Delay(50);
+            // remove all links that scored in cells
+
+            // drop all links by 1 row until no more links can drop
+
+            score = scoreLinks();
+        }
+
+        return score;
+    }
+
+    private int scoreLinks()
+    {
+        var linksBroken = 0;
+        // for all consecutive chains in a column linksBroken++
+        // mark this cell as scored
+        // for all consecutive chains in a row linksBroken++
+        // mark this cell as scored
+        return linksBroken;
     }
 }

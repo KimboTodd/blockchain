@@ -1,20 +1,64 @@
 ﻿@namespace Blockchain.Shared
 
-<h5>Is playing: @IsPlaying</h5>
-
-@if(IsPlaying == false)
-{
-    <button @onclick="Start">Start</button>
-} 
-else
-{
-    <h5>Score: @Score</h5>
-
-    <h5>Next: @NextBlock.DisplayNumber</h5>
-
-    <h5>Current: @CurrentBlock.DisplayNumber</h5>
-}
-
 <div @onkeydown="KeyDown">
-    <Board CurrentBlock=@CurrentBlock />
+
+    @if (IsPlaying == false)
+    {
+        <button @onclick="Start">Start Game</button>
+    }
+    else
+    {
+        <h5>Score: @Score</h5>
+
+        <h5>Next: @NextLink?.DisplayNumber</h5>
+
+        <h5>Current: @CurrentBlock?.DisplayNumber</h5>
+    }
+
+    @if (IsGameOver == true)
+    {
+        <h5>Game Over</h5>
+    }
+
+    <table class="table" tabindex="0">
+        <thead>
+        <tr>
+            @for (var i = 0; i <= Cells.GetLength(0); i++)
+            {
+                if (CurrentBlock?.Column == i && CurrentBlock?.Row == 7)
+                {
+                    <th scope="col">@CurrentBlock.DisplayNumber</th>
+                }
+                else
+                {
+                    <th scope="col"></th>
+                }
+            }
+        </tr>
+        </thead>
+
+        <tbody>
+        @* Loop through rows top to bottom *@
+        @for (var i = Cells.GetLength(0) - 1; i >= 0; i--)
+        {
+            @* Loop through columns left to right *@
+            <tr>
+                @for (var j = 0; j <= Cells.GetUpperBound(1); j++)
+                {
+                    @if (Cells[i, j]?.Number is not null)
+                    {
+                        <Link Number="@Cells[i, j]?.Number"/>
+                    }
+                    else
+                    {
+                        <Link Number="0"/>
+                    }
+                }
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <h5>Is playing: @IsPlaying</h5>
+
 </div>
