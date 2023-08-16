@@ -37,6 +37,7 @@ partial class Game : ComponentBase
         // HandleBlockedRow
 
         CurrentLink = new Link(7, 4, NextNumber ?? IMPOSSIBLE_NUMBER);
+
         NextNumber = GenerateNumber();
         StateHasChanged();
     }
@@ -84,12 +85,12 @@ partial class Game : ComponentBase
                     return;
                 }
 
-                await HandleDropAsync();
+                await handleDropAsync();
                 break;
         }
     }
 
-    private async Task HandleDropAsync()
+    private async Task handleDropAsync()
     {
         if (IsPlaying is false || CurrentLink is null)
         {
@@ -98,14 +99,62 @@ partial class Game : ComponentBase
 
         droppingAnimation = true;
 
-        await DropInAsync(CurrentLink);
+        await dropCurrentLinkAsync(CurrentLink);
+
+        // Handle scoring and possible combos
+        var linksScoring = scoreLinks();
+        while (linksScoring is true)
+        {
+            // delay to give animation time to play
+            await Task.Delay(150);
+
+            // remove all links that scored in cells
+            for (var i = 0; i < Cells.GetLength(0); i++)
+            {
+                for (var j = 0; j < Cells.GetUpperBound(1); j++)
+                {
+                    if (Cells[i, j]?.Scored is true)
+                    {
+                        Cells[i, j] = null;
+                    }
+                }
+            }
+
+            var cellsShifted = await shiftCellsDown();
+            while (cellsShifted) cellsShifted = await shiftCellsDown();
+
+            linksScoring = scoreLinks();
+        }
 
         droppingAnimation = false;
 
         GameLoop();
     }
 
-    private async Task DropInAsync(Link current)
+    private async Task<bool> shiftCellsDown()
+    {
+        var cellsShifted = false;
+        for (var j = 0; j < Cells.GetUpperBound(1); j++)
+        {
+            // loop through each column starting at the bottom
+            for (var i = 0; i < Cells.GetLength(0) - 1; i++)
+            {
+                // if we encounter a null cell and the one above it is not null
+                if (Cells[i, j] is null && Cells[i + 1, j] is not null)
+                {
+                    cellsShifted = true;
+                    Cells[i, j] = Cells[i + 1, j];
+                    Cells[i + 1, j] = null;
+                }
+            }
+        }
+
+        StateHasChanged();
+        await Task.Delay(150);
+        return cellsShifted;
+    }
+
+    private async Task dropCurrentLinkAsync(Link current)
     {
         if (IsPlaying is false || CurrentLink is null)
         {
@@ -139,29 +188,6 @@ partial class Game : ComponentBase
 
             StateHasChanged();
             await Task.Delay(50);
-        }
-
-        var linksScoring = scoreLinks();
-        while (linksScoring is true)
-        {
-            // delay to give animation time to play
-            await Task.Delay(200);
-
-            // remove all links that scored in cells
-            for (var i = 0; i < Cells.GetLength(0); i++)
-            {
-                for (var j = 0; j < Cells.GetUpperBound(1); j++)
-                {
-                    if (Cells[i, j]?.Scored is true)
-                    {
-                        Cells[i, j] = null;
-                    }
-                }
-            }
-
-            // TODO: drop all links by 1 row until no more links can drop
-
-            linksScoring = scoreLinks();
         }
     }
 
