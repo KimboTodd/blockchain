@@ -1,7 +1,10 @@
-﻿namespace Blockchain.Shared;
+namespace Blockchain.Shared;
 
 partial class Game : ComponentBase
 {
+    // set by the @ref attribute
+    protected ElementReference gameBoardDiv;
+
     private ScoreKeeper scoreKeeper;
 
     private int? NextNumber { get; set; }
@@ -20,11 +23,14 @@ partial class Game : ComponentBase
 
     private const int SIZE = 7;
 
-    private void Start()
+    private async Task Start()
     {
         IsPlaying = true;
         IsGameOver = false;
         NextNumber = GenerateNumber();
+
+        //Focus the browser on the grid board div
+        gameBoardDiv.FocusAsync();
 
         GameLoop();
     }

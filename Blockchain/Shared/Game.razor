@@ -1,26 +1,26 @@
 ﻿@namespace Blockchain.Shared
 
-<div @onkeydown="KeyDown">
 
-    @if (IsPlaying == true)
+@if (IsPlaying == true)
+{
+    <ScoreKeeper IsGameOver="@IsGameOver" IsPlaying="@IsPlaying" @ref="scoreKeeper"/>
+
+    <h5>Next: @NextNumber.ToString()</h5>
+
+    <h5>Current: @CurrentLink?.DisplayNumber</h5>
+}
+else
+{
+    @if (IsGameOver == true)
     {
-        <ScoreKeeper IsGameOver="@IsGameOver" IsPlaying="@IsPlaying" @ref="scoreKeeper"/>
-
-        <h5>Next: @NextNumber.ToString()</h5>
-
-        <h5>Current: @CurrentLink?.DisplayNumber</h5>
-    }
-    else
-    {
-        @if (IsGameOver == true)
-        {
-            <h5>Game Over</h5>
-        }
-
-        <button @onclick="Start">Start Game</button>
+        <h5>Game Over</h5>
     }
 
-    <table class="table" tabindex="0">
+    <button @onclick="Start">Start Game</button>
+}
+
+<div @onkeydown="KeyDown" @ref="gameBoardDiv" tabindex="0">
+    <table class="table">
         <thead>
         <tr>
             @for (var i = 0; i <= Cells.GetLength(0); i++)
