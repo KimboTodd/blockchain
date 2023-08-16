@@ -2,11 +2,11 @@
 
 partial class Game : ComponentBase
 {
-    public int? NextNumber { get; private set; }
+    private int? NextNumber { get; set; }
 
-    public int Score { get; private set; }
+    private int Score { get; set; }
 
-    public bool droppingAnimation { get; set; }
+    private bool droppingAnimation { get; set; }
 
     private bool IsPlaying { get; set; } = false;
 
@@ -14,7 +14,11 @@ partial class Game : ComponentBase
 
     private Link? CurrentLink { get; set; }
 
+    private Link?[,] Cells { get; set; } = new Link[SIZE, SIZE];
+
     private const int IMPOSSIBLE_NUMBER = 8;
+
+    private const int SIZE = 7;
 
     private void Start()
     {
@@ -45,7 +49,7 @@ partial class Game : ComponentBase
 
     private static int GenerateNumber()
     {
-        return new Random(DateTime.Now.Millisecond).Next(1, 2);
+        return new Random(DateTime.Now.Millisecond).Next(3, 4);
 
         // return new Random(DateTime.Now.Millisecond).Next(1, 8);
     }
@@ -111,10 +115,6 @@ partial class Game : ComponentBase
         GameLoop();
     }
 
-    private const int Size = 7;
-
-    private Link?[,] Cells { get; set; } = new Link[Size, Size];
-
     private async Task<int> DropInAsync(Link current)
     {
         if (IsPlaying is false || CurrentLink is null)
@@ -128,7 +128,8 @@ partial class Game : ComponentBase
             return 0;
         }
 
-        while (CurrentLink.Row > 0)
+        var collided = false;
+        while (CurrentLink.Row > 0 && collided == false)
         {
             if (Cells[CurrentLink.Row - 1, CurrentLink.Column] is null || Cells[CurrentLink.Row - 1, CurrentLink.Column]?.DisplayNumber is null)
             {
@@ -140,6 +141,10 @@ partial class Game : ComponentBase
                 CurrentLink.Row -= 1;
 
                 Cells[CurrentLink.Row, CurrentLink.Column] = CurrentLink;
+            }
+            else
+            {
+                collided = true;
             }
 
             StateHasChanged();
@@ -180,35 +185,29 @@ partial class Game : ComponentBase
         for (var i = 0; i < Cells.GetLength(0); i++)
         {
             int? chainStart = null;
-            int? chainEnd = null;
             for (var j = 0; j < Cells.GetUpperBound(1); j++)
-                // if we encounter a filled cell
             {
+                // if we encounter a filled cell
                 if (Cells[i, j] is not null)
                 {
-                    // if chain start is null, set it to this cell index
+                    // if chainStart is null, set it to this cell index
                     if (chainStart is null)
                     {
                         chainStart = j;
-                    }
-                    // else if chain start is not null, increment the end of the chain marker
-                    else if (chainEnd is not null)
-                    {
-                        chainEnd = j;
                     }
                 }
                 else
                 {
                     // we have encountered an empty cell
-                    // if chain start is not null, we have found the end of the chain
+                    // if chainStart is not null, we have found the end of the chain
                     if (chainStart is not null)
                     {
-                        chainEnd = j;
+                        var chainEnd = j;
                         var consecutiveChainLength = chainEnd - chainStart;
                         // traverse this chain from chainStart to chainEnd
                         for (var k = chainStart.GetValueOrDefault(); k < chainEnd; k++)
                         {
-                            // and mark any cels within that number == consecutiveChainLength as scored
+                            // and mark any cells within that number == consecutiveChainLength as scored
                             if (Cells[i, k].Number == consecutiveChainLength)
                             {
                                 Cells[i, k].Scored = true;
@@ -218,13 +217,52 @@ partial class Game : ComponentBase
 
                         // reset chain start and end to null
                         chainStart = null;
-                        chainEnd = null;
                     }
                 }
             }
-
-            // Loop through columns top to bottom scanning vertically for consecutive filled cells
         }
+
+        // Loop through columns top to bottom scanning vertically for consecutive filled cells
+        for (var j = 0; j < Cells.GetUpperBound(1); j++)
+        {
+            int? chainStart = null;
+            for (var i = 0; i < Cells.GetLength(0); i++)
+            {
+                // if we encounter a filled cell
+                if (Cells[i, j] is not null)
+                {
+                    // if chainStart is null, set it to this cell index
+                    if (chainStart is null)
+                    {
+                        chainStart = i;
+                    }
+                }
+                else
+                {
+                    // we have encountered an empty cell
+                    // if chainStart is not null, we have found the end of the chain
+                    if (chainStart is not null)
+                    {
+                        var chainEnd = i;
+                        var consecutiveChainLength = chainEnd - chainStart;
+                        // traverse this chain from chainStart to chainEnd
+                        for (var k = chainStart.GetValueOrDefault(); k < chainEnd; k++)
+                        {
+                            // and mark any cels within that number == consecutiveChainLength as scored
+                            if (Cells[k, j].Number == consecutiveChainLength)
+                            {
+                                Cells[k, j].Scored = true;
+                                linksBroken++;
+                            }
+                        }
+
+                        // reset chain start and end to null
+                        chainStart = null;
+                    }
+                }
+            }
+        }
+
 
         return linksBroken;
     }
