@@ -20,9 +20,9 @@ partial class Game : ComponentBase
 
     private Link?[,] Cells { get; set; } = new Link[SIZE, SIZE];
 
-    private const int IMPOSSIBLE_NUMBER = 8;
+    private const int IMPOSSIBLE_NUMBER = 9;
 
-    private const int BLOCKED_LINK = 0;
+    private const int BLOCKED_LINK = 8;
 
     private const int SIZE = 7;
 
