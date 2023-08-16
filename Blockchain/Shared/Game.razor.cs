@@ -49,9 +49,7 @@ partial class Game : ComponentBase
 
     private static int GenerateNumber()
     {
-        return new Random(DateTime.Now.Millisecond).Next(3, 4);
-
-        // return new Random(DateTime.Now.Millisecond).Next(1, 8);
+        return new Random(DateTime.Now.Millisecond).Next(1, 8);
     }
 
     private async Task KeyDown(KeyboardEventArgs e)
