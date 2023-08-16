@@ -2,22 +2,22 @@
 
 <div @onkeydown="KeyDown">
 
-    @if (IsPlaying == false)
+    @if (IsPlaying == true)
     {
-        <button @onclick="Start">Start Game</button>
-    }
-    else
-    {
-        <h5>Score: @Score</h5>
+        <ScoreKeeper IsGameOver="@IsGameOver" IsPlaying="@IsPlaying" @ref="scoreKeeper"/>
 
         <h5>Next: @NextNumber.ToString()</h5>
 
         <h5>Current: @CurrentLink?.DisplayNumber</h5>
     }
-
-    @if (IsGameOver == true)
+    else
     {
-        <h5>Game Over</h5>
+        @if (IsGameOver == true)
+        {
+            <h5>Game Over</h5>
+        }
+
+        <button @onclick="Start">Start Game</button>
     }
 
     <table class="table" tabindex="0">
@@ -58,7 +58,4 @@
         }
         </tbody>
     </table>
-
-    <h5>Is playing: @IsPlaying</h5>
-
 </div>

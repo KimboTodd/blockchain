@@ -2,9 +2,9 @@
 
 partial class Game : ComponentBase
 {
-    private int? NextNumber { get; set; }
+    private ScoreKeeper scoreKeeper;
 
-    private int Score { get; set; }
+    private int? NextNumber { get; set; }
 
     private bool droppingAnimation { get; set; }
 
@@ -22,7 +22,6 @@ partial class Game : ComponentBase
 
     private void Start()
     {
-        Score = 0;
         IsPlaying = true;
         IsGameOver = false;
         NextNumber = GenerateNumber();
@@ -37,13 +36,8 @@ partial class Game : ComponentBase
         // if this would collide, game over
         // HandleBlockedRow
 
-        // TODO: figure out what's going on with the link not displaying
-        var thing = new Link(7, 4, NextNumber ?? IMPOSSIBLE_NUMBER);
-        Console.WriteLine($"Current link: {thing.DisplayNumber}");
-        CurrentLink = thing;
-        var next = GenerateNumber();
-        Console.WriteLine($"Next: {next}");
-        NextNumber = next;
+        CurrentLink = new Link(7, 4, NextNumber ?? IMPOSSIBLE_NUMBER);
+        NextNumber = GenerateNumber();
         StateHasChanged();
     }
 
@@ -104,26 +98,24 @@ partial class Game : ComponentBase
 
         droppingAnimation = true;
 
-        var additionalScore = await DropInAsync(CurrentLink);
-        // consider changing this to an event to score as we go, might be more exciting
-        Score += additionalScore;
+        await DropInAsync(CurrentLink);
 
         droppingAnimation = false;
 
         GameLoop();
     }
 
-    private async Task<int> DropInAsync(Link current)
+    private async Task DropInAsync(Link current)
     {
         if (IsPlaying is false || CurrentLink is null)
         {
-            return 0;
+            return;
         }
 
         if (Cells[6, CurrentLink.Column] is not null)
         {
             IsGameOver = true;
-            return 0;
+            return;
         }
 
         var collided = false;
@@ -149,8 +141,8 @@ partial class Game : ComponentBase
             await Task.Delay(50);
         }
 
-        var score = scoreLinks();
-        while (score > 0)
+        var linksScoring = scoreLinks();
+        while (linksScoring is true)
         {
             // delay to give animation time to play
             await Task.Delay(200);
@@ -167,16 +159,13 @@ partial class Game : ComponentBase
                 }
             }
 
-            // drop all links by 1 row until no more links can drop
+            // TODO: drop all links by 1 row until no more links can drop
 
-
-            score = scoreLinks();
+            linksScoring = scoreLinks();
         }
-
-        return score;
     }
 
-    private int scoreLinks()
+    private bool scoreLinks()
     {
         var linksBroken = 0;
         // Loop through rows left to right scanning horizontally for consecutive filled chains
@@ -261,7 +250,7 @@ partial class Game : ComponentBase
             }
         }
 
-
-        return linksBroken;
+        scoreKeeper.OnLinksBroken(linksBroken);
+        return linksBroken > 0;
     }
 }

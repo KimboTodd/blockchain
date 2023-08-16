@@ -1,0 +1,20 @@
+﻿@namespace Blockchain.Shared
+
+@if (IsGameOver)
+{
+    <h1>Game Over</h1>
+}
+else if (IsPlaying)
+{
+    <h1>Score: @Score</h1>
+}
+
+@if (comboAnimation)
+{
+    <h1>Combo!</h1>
+}
+
+@foreach (var linkBroken in _LastLinksBroken)
+{
+    <h3>@linkBroken</h3>
+}

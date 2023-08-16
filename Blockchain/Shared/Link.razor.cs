@@ -5,6 +5,10 @@ namespace Blockchain.Shared;
 [DebuggerDisplay("Row: {Row}, Column: {Column} Number: {Number}")]
 partial class Link : ComponentBase
 {
+    public Link()
+    {
+    }
+
     [Parameter]
     public Link? CellParameter { get; set; }
 
@@ -20,23 +24,6 @@ partial class Link : ComponentBase
         Column = column;
         Number = number;
     }
-
-    public Link()
-    {
-    }
-
-    // private int _number;
-
-    // {
-    //     get => _number; set
-    //     {
-    //         if (_number != value)
-    //         {
-    //             _number = value;
-    //             StateHasChanged();
-    //         }
-    //     }
-    // }
 
     public string DisplayNumber => Number?.ToString() ?? string.Empty;
 
