@@ -1,11 +1,12 @@
-namespace Blockchain.Shared;
+﻿namespace Blockchain.Shared;
 
 partial class Game : ComponentBase
 {
-    // set by the @ref attribute
     protected ElementReference gameBoardDiv;
 
     private ScoreKeeper scoreKeeper;
+
+    public int TotalLinks { get; set; }
 
     private int? NextNumber { get; set; }
 
@@ -20,6 +21,8 @@ partial class Game : ComponentBase
     private Link?[,] Cells { get; set; } = new Link[SIZE, SIZE];
 
     private const int IMPOSSIBLE_NUMBER = 8;
+
+    private const int BLOCKED_LINK = 0;
 
     private const int SIZE = 7;
 
@@ -37,12 +40,42 @@ partial class Game : ComponentBase
 
     private void GameLoop()
     {
-        // if we have dropped 7 links,
-        // add a new row to the bottom,
-        // if this would collide, game over
-        // HandleBlockedRow
-
         CurrentLink = new Link(7, 4, NextNumber ?? IMPOSSIBLE_NUMBER);
+        TotalLinks += 1;
+
+        // TODO: if we have dropped 7 links, add a new blocked row to the bottom
+        if (TotalLinks % 7 == 0)
+        {
+            var shiftedCells = new Link[SIZE, SIZE];
+
+            // Looping top to bottom - [row, column]
+            for (var i = Cells.GetLength(0) - 1; i >= 0; i--)
+            {
+                for (var j = 0; j < Cells.GetUpperBound(1); j++)
+                {
+                    if (i == Cells.GetLength(0) && Cells[i, j] is not null)
+                    {
+                        // in the first row, if anything is not null, game over
+                        IsGameOver = true;
+                        IsPlaying = false;
+                        break;
+                    }
+
+                    // Last row add new blocked row
+                    if (i == 0)
+                    {
+                        shiftedCells[i, j] = new Link(i, j, BLOCKED_LINK);
+                    }
+                    else if (Cells[i - 1, j] is not null)
+                    {
+                        // shift all rows up one
+                        shiftedCells[i, j] = Cells[i - 1, j];
+                    }
+                }
+            }
+
+            Cells = shiftedCells;
+        }
 
         NextNumber = GenerateNumber();
         StateHasChanged();
@@ -193,7 +226,7 @@ partial class Game : ComponentBase
             }
 
             StateHasChanged();
-            await Task.Delay(50);
+            await Task.Delay(40);
         }
     }
 
