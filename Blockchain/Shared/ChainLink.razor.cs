@@ -16,7 +16,11 @@ public partial class ChainLink : ComponentBase
     public int? Number { get; set; }
 
     [Parameter]
+    public bool StagingRow { get; set; }
+
+    [Parameter]
     public bool? Scored { get; set; }
+    private bool IsScored => Scored ?? false;
 
     public ChainLink(int row, int column, int number)
     {

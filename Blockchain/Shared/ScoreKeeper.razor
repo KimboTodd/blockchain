@@ -3,7 +3,8 @@
 @switch (GameState)
 {
     case GameState.Started:
-        <h1>Score: @Score</h1>
+        var text = $"Score: {Score}";
+        <Display Text="@text"/>
 
         @if (comboAnimation)
         {

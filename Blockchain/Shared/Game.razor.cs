@@ -1,4 +1,4 @@
-namespace Blockchain.Shared;
+﻿namespace Blockchain.Shared;
 
 public partial class Game : ComponentBase
 {

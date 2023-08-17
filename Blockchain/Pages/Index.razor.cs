@@ -1,7 +1,7 @@
-﻿partial class Index : ComponentBase
-{
-    Game Game { get; set; } = new();
+﻿namespace Blockchain.Pages;
 
+public partial class Index : ComponentBase
+{
     protected override void OnInitialized()
     {
     }

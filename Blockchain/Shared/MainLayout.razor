@@ -3,19 +3,17 @@
 
 <PageTitle>Blockchain</PageTitle>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4 auth">
-            <LoginDisplay />
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+<div class="flex h-screen">
+    <main class="flex flex-col flex-grow">
+        <article class="flex h-full">
             @Body
         </article>
+
+        <div class="bg-slate-600 flex flex-row justify-between p-4">
+            <a class="flex text-slate-200" href="kimbo.dev" target="_blank">kimbo.dev</a>
+            <div class="flex text-slate-200">
+                <LoginDisplay/>
+            </div>
+        </div>
     </main>
 </div>

@@ -1,57 +1,58 @@
 @namespace Blockchain.Shared
 
-@if (GameState == GameState.GameOver)
-{
-    <h5>Game Over</h5>
-}
-
-@if (GameState == GameState.NotStarted || GameState == GameState.GameOver)
-{
-    <button @onclick="Start">Start Game</button>
-}
-
-<ScoreKeeper GameState="@GameState" @ref="scoreKeeper"/>
-
-<h5>Next: @NextNumber.ToString()</h5>
-<h5>Current: @CurrentLink?.DisplayNumber</h5>
-
-<div @onkeydown="KeyDown" @ref="gameBoardDiv" tabindex="0">
-    <table class="table">
-        <thead>
-        <tr>
-            @for (var i = 0; i <= Cells.GetLength(0); i++)
-            {
-                if (CurrentLink?.Column == i && CurrentLink?.Row == 7)
+<div class="bg-slate-900  md:p-12 overflow-hidden p-4 w-screen" id="background">
+    <div class="invisible max-w-7xl md:visible mx-auto" id="visibility flex flex-row">
+        <div class="flex flex-row justify-between">
+            <section class=" basis-1/2 border-4 border-b-4 border-double border-green-600 grid grid-cols-7 w-full" @onkeydown="KeyDown" @ref="gameBoardDiv" tabindex="0">
+                @for (var i = 0; i < Cells.GetLength(0); i++)
                 {
-                    <th scope="col">@CurrentLink.DisplayNumber</th>
-                }
-                else
-                {
-                    <th scope="col"></th>
-                }
-            }
-        </tr>
-        </thead>
-
-        <tbody>
-        @* Loop through rows top to bottom *@
-        @for (var i = Cells.GetLength(0) - 1; i >= 0; i--)
-        {
-            @* Loop through columns left to right *@
-            <tr>
-                @for (var j = 0; j <= Cells.GetUpperBound(1); j++)
-                {
-                    @if (Cells[i, j]?.Number is not null)
+                    if (CurrentLink?.Column == i && CurrentLink?.Row == 7)
                     {
-                        <ChainLink Number="@Cells[i, j]?.Number" Scored="@Cells[i, j]?.Scored"/>
+                        <ChainLink Number="CurrentLink.Number" Scored="false" StagingRow="true"/>
                     }
                     else
                     {
-                        <ChainLink Number="0"/>
+                        <ChainLink Scored="false" StagingRow="true"/>
                     }
                 }
-            </tr>
-        }
-        </tbody>
-    </table>
+
+                @* Loop through rows top to bottom [row, column] *@
+                @for (var j = 0; j <= Cells.GetUpperBound(1); j++)
+                {
+                    <div>
+                        @for (var i = Cells.GetLength(0) - 1; i >= 0; i--)
+                            @* Loop through columns left to right *@
+                        {
+                            <ChainLink Number="@Cells[i, j]?.Number" Scored="@Cells[i, j]?.Scored" StagingRow="false"/>
+                        }
+                    </div>
+                }
+            </section>
+
+            <section class="basis-1/2 flex flex-col justify-between lg:px-10 px-4 w-full">
+                @if (GameState == GameState.GameOver)
+                {
+                    <Display Text="Game Over"/>
+                }
+
+                <ScoreKeeper GameState="@GameState" @ref="scoreKeeper"/>
+
+                @if (GameState == GameState.Started)
+                {
+                    var currentLinkText = $"Current: {CurrentLink?.DisplayNumber}";
+                    <Display Text="@currentLinkText"/>
+
+                    var nextLinkText = $"next: {NextNumber}";
+                    <Display Text="@nextLinkText"/>
+                }
+
+                @if (GameState is GameState.NotStarted or GameState.GameOver)
+                {
+                    <button class="border-4 border-double border-green-600 box-border cursor-pointer font-mono lg:text-2xl p-4 sm:text-xl text-green-500 w-full" @onclick="Start">
+                        Start Game
+                    </button>
+                }
+            </section>
+        </div>
+    </div>
 </div>
