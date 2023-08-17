@@ -50,11 +50,11 @@
                 {
                     @if (Cells[i, j]?.Number is not null)
                     {
-                        <Link Number="@Cells[i, j]?.Number" Scored="@Cells[i, j]?.Scored"/>
+                        <ChainLink Number="@Cells[i, j]?.Number" Scored="@Cells[i, j]?.Scored"/>
                     }
                     else
                     {
-                        <Link Number="0"/>
+                        <ChainLink Number="0"/>
                     }
                 }
             </tr>

@@ -3,14 +3,14 @@
 namespace Blockchain.Shared;
 
 [DebuggerDisplay("Row: {Row}, Column: {Column} Number: {Number}")]
-public partial class Link : ComponentBase
+public partial class ChainLink : ComponentBase
 {
-    public Link()
+    public ChainLink()
     {
     }
 
     [Parameter]
-    public Link? CellParameter { get; set; }
+    public ChainLink? CellParameter { get; set; }
 
     [Parameter]
     public int? Number { get; set; }
@@ -18,7 +18,7 @@ public partial class Link : ComponentBase
     [Parameter]
     public bool? Scored { get; set; }
 
-    public Link(int row, int column, int number)
+    public ChainLink(int row, int column, int number)
     {
         Row = row;
         Column = column;

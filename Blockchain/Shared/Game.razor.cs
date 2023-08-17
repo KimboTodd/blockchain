@@ -20,9 +20,9 @@ public partial class Game : ComponentBase
 
     private GameState GameState { get; set; } = GameState.NotStarted;
 
-    private Link? CurrentLink { get; set; }
+    private ChainLink? CurrentLink { get; set; }
 
-    private Link?[,] Cells { get; set; } = new Link[SIZE, SIZE];
+    private ChainLink?[,] Cells { get; set; } = new ChainLink[SIZE, SIZE];
 
     private async Task Start()
     {
@@ -37,13 +37,13 @@ public partial class Game : ComponentBase
 
     private void GameLoop()
     {
-        CurrentLink = new Link(7, 4, NextNumber ?? IMPOSSIBLE_NUMBER);
+        CurrentLink = new ChainLink(7, 4, NextNumber ?? IMPOSSIBLE_NUMBER);
         TotalLinks += 1;
 
         // TODO: if we have dropped 7 links, add a new blocked row to the bottom
         if (TotalLinks % 7 == 0)
         {
-            var shiftedCells = new Link[SIZE, SIZE];
+            var shiftedCells = new ChainLink[SIZE, SIZE];
 
             // Looping top to bottom - [row, column]
             for (var i = Cells.GetLength(0) - 1; i >= 0; i--)
@@ -60,7 +60,7 @@ public partial class Game : ComponentBase
                     // Last row add new blocked row
                     if (i == 0)
                     {
-                        shiftedCells[i, j] = new Link(i, j, BLOCKED_LINK);
+                        shiftedCells[i, j] = new ChainLink(i, j, BLOCKED_LINK);
                     }
                     else if (Cells[i - 1, j] is not null)
                     {
@@ -189,7 +189,7 @@ public partial class Game : ComponentBase
         return cellsShifted;
     }
 
-    private async Task DropCurrentLinkAsync(Link current)
+    private async Task DropCurrentLinkAsync(ChainLink current)
     {
         if (GameState != GameState.Started || CurrentLink is null)
         {
