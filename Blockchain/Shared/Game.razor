@@ -1,26 +1,19 @@
-﻿@namespace Blockchain.Shared
+@namespace Blockchain.Shared
 
-@switch (GameState)
+@if (GameState == GameState.GameOver)
 {
-    case GameState.Started:
-        <ScoreKeeper GameState="@GameState" @ref="scoreKeeper"/>
-        <h5>Next: @NextNumber.ToString()</h5>
-        <h5>Current: @CurrentLink?.DisplayNumber</h5>
-        break;
-
-    case GameState.NotStarted:
-        <button @onclick="Start">Start Game</button>
-        break;
-
-    case GameState.GameOver:
-        <ScoreKeeper GameState="@GameState" @ref="scoreKeeper"/>
-        <h5>Game Over</h5>
-        <button @onclick="Start">Start Game</button>
-        break;
-
-    default:
-        throw new ArgumentOutOfRangeException();
+    <h5>Game Over</h5>
 }
+
+@if (GameState == GameState.NotStarted || GameState == GameState.GameOver)
+{
+    <button @onclick="Start">Start Game</button>
+}
+
+<ScoreKeeper GameState="@GameState" @ref="scoreKeeper"/>
+
+<h5>Next: @NextNumber.ToString()</h5>
+<h5>Current: @CurrentLink?.DisplayNumber</h5>
 
 <div @onkeydown="KeyDown" @ref="gameBoardDiv" tabindex="0">
     <table class="table">
