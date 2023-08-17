@@ -1,9 +1,9 @@
 ﻿@namespace Blockchain.Shared
 
-@switch (gameState)
+@switch (GameState)
 {
     case GameState.Started:
-        <ScoreKeeper GameState="@gameState" @ref="scoreKeeper"/>
+        <ScoreKeeper GameState="@GameState" @ref="scoreKeeper"/>
         <h5>Next: @NextNumber.ToString()</h5>
         <h5>Current: @CurrentLink?.DisplayNumber</h5>
         break;
@@ -13,7 +13,7 @@
         break;
 
     case GameState.GameOver:
-        <ScoreKeeper GameState="@gameState" @ref="scoreKeeper"/>
+        <ScoreKeeper GameState="@GameState" @ref="scoreKeeper"/>
         <h5>Game Over</h5>
         <button @onclick="Start">Start Game</button>
         break;

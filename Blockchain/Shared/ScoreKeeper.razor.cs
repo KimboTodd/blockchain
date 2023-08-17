@@ -1,15 +1,15 @@
 namespace Blockchain.Shared;
 
-partial class ScoreKeeper : ComponentBase
+public partial class ScoreKeeper : ComponentBase
 {
     private GameState _gameState;
 
-    private List<int>? _LastLinksBroken;
+    private List<int>? _lastLinksBroken;
 
     private bool comboAnimation = false;
 
     [Parameter]
-    public GameState gameState
+    public GameState GameState
     {
         get => _gameState;
         set
@@ -19,7 +19,7 @@ partial class ScoreKeeper : ComponentBase
                 if (value == GameState.Started)
                 {
                     Score = 0;
-                    _LastLinksBroken = new List<int>();
+                    _lastLinksBroken = new List<int>();
                 }
 
                 _gameState = value;
@@ -29,18 +29,18 @@ partial class ScoreKeeper : ComponentBase
 
     public async Task OnLinksBrokenAsync(int linksBroken)
     {
-        _ = _LastLinksBroken ?? throw new Exception(nameof(_LastLinksBroken) + " is null, but should not be");
+        _ = _lastLinksBroken ?? throw new Exception(nameof(_lastLinksBroken) + " is null, but should not be");
 
         if (linksBroken == 0)
         {
-            _LastLinksBroken.Clear();
+            _lastLinksBroken.Clear();
         }
         else
         {
-            _LastLinksBroken.Add(linksBroken);
+            _lastLinksBroken.Add(linksBroken);
 
-            var currentPoints = fibonacciScore(linksBroken) * 10;
-            var comboMultiplier = _LastLinksBroken.Count;
+            var currentPoints = FibonacciScore(linksBroken) * 10;
+            var comboMultiplier = _lastLinksBroken.Count;
             var comboPoints = currentPoints * comboMultiplier;
             Score += comboPoints;
             StateHasChanged();
@@ -60,13 +60,13 @@ partial class ScoreKeeper : ComponentBase
 
     private int Score { get; set; }
 
-    private int fibonacciScore(int linksBroken)
+    private int FibonacciScore(int linksBroken)
     {
         if (linksBroken is 0 or 1)
         {
             return linksBroken;
         }
 
-        return fibonacciScore(linksBroken - 1) + fibonacciScore(linksBroken - 2);
+        return FibonacciScore(linksBroken - 1) + FibonacciScore(linksBroken - 2);
     }
 }

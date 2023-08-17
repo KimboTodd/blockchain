@@ -1,35 +1,35 @@
 namespace Blockchain.Shared;
 
-partial class Game : ComponentBase
+public partial class Game : ComponentBase
 {
     private ElementReference gameBoardDiv;
 
-    private ScoreKeeper scoreKeeper;
+    private ScoreKeeper? scoreKeeper;
+
+    private const int IMPOSSIBLE_NUMBER = 9;
+
+    private const int SIZE = 7;
+
+    private const int BLOCKED_LINK = 8;
 
     private int TotalLinks { get; set; }
 
     private int? NextNumber { get; set; }
 
-    private bool droppingAnimation { get; set; }
+    private bool DroppingAnimation { get; set; }
 
-    private GameState gameState { get; set; } = GameState.NotStarted;
+    private GameState GameState { get; set; } = GameState.NotStarted;
 
     private Link? CurrentLink { get; set; }
 
     private Link?[,] Cells { get; set; } = new Link[SIZE, SIZE];
 
-    private const int IMPOSSIBLE_NUMBER = 9;
-
-    private const int BLOCKED_LINK = 8;
-
-    private const int SIZE = 7;
-
     private async Task Start()
     {
-        gameState = GameState.Started;
+        GameState = GameState.Started;
         NextNumber = GenerateNumber();
 
-        //Focus the browser on the grid board div
+        // Focus the browser on the grid board div
         await gameBoardDiv.FocusAsync();
 
         GameLoop();
@@ -53,7 +53,7 @@ partial class Game : ComponentBase
                     if (i == Cells.GetLength(0) && Cells[i, j] is not null)
                     {
                         // in the first row, if anything is not null, game over
-                        gameState = GameState.GameOver;
+                        GameState = GameState.GameOver;
                         break;
                     }
 
@@ -84,7 +84,7 @@ partial class Game : ComponentBase
 
     private async Task KeyDown(KeyboardEventArgs e)
     {
-        if (gameState != GameState.Started || CurrentLink is null)
+        if (GameState != GameState.Started || CurrentLink is null)
         {
             return;
         }
@@ -92,7 +92,7 @@ partial class Game : ComponentBase
         switch (e.Key)
         {
             case "ArrowRight":
-                if (droppingAnimation)
+                if (DroppingAnimation)
                 {
                     return;
                 }
@@ -103,7 +103,7 @@ partial class Game : ComponentBase
                 StateHasChanged();
                 break;
             case "ArrowLeft":
-                if (droppingAnimation)
+                if (DroppingAnimation)
                 {
                     return;
                 }
@@ -115,29 +115,29 @@ partial class Game : ComponentBase
                 break;
             case "ArrowDown":
             case " ":
-                if (droppingAnimation)
+                if (DroppingAnimation)
                 {
                     return;
                 }
 
-                await handleDropAsync();
+                await HandleDropAsync();
                 break;
         }
     }
 
-    private async Task handleDropAsync()
+    private async Task HandleDropAsync()
     {
-        if (gameState != GameState.Started || CurrentLink is null)
+        if (GameState != GameState.Started || CurrentLink is null)
         {
             return;
         }
 
-        droppingAnimation = true;
+        DroppingAnimation = true;
 
-        await dropCurrentLinkAsync(CurrentLink);
+        await DropCurrentLinkAsync(CurrentLink);
 
         // Handle scoring and possible combos
-        var linksScoring = scoreLinks();
+        var linksScoring = ScoreLinks();
         while (linksScoring is true)
         {
             // delay to give animation time to play
@@ -155,18 +155,18 @@ partial class Game : ComponentBase
                 }
             }
 
-            var cellsShifted = await shiftCellsDown();
-            while (cellsShifted) cellsShifted = await shiftCellsDown();
+            var cellsShifted = await ShiftCellsDown();
+            while (cellsShifted) cellsShifted = await ShiftCellsDown();
 
-            linksScoring = scoreLinks();
+            linksScoring = ScoreLinks();
         }
 
-        droppingAnimation = false;
+        DroppingAnimation = false;
 
         GameLoop();
     }
 
-    private async Task<bool> shiftCellsDown()
+    private async Task<bool> ShiftCellsDown()
     {
         var cellsShifted = false;
         for (var j = 0; j < Cells.GetUpperBound(1); j++)
@@ -189,16 +189,16 @@ partial class Game : ComponentBase
         return cellsShifted;
     }
 
-    private async Task dropCurrentLinkAsync(Link current)
+    private async Task DropCurrentLinkAsync(Link current)
     {
-        if (gameState != GameState.Started || CurrentLink is null)
+        if (GameState != GameState.Started || CurrentLink is null)
         {
             return;
         }
 
         if (Cells[6, CurrentLink.Column] is not null)
         {
-            gameState = GameState.GameOver;
+            GameState = GameState.GameOver;
             return;
         }
 
@@ -226,7 +226,7 @@ partial class Game : ComponentBase
         }
     }
 
-    private bool scoreLinks()
+    private bool ScoreLinks()
     {
         var linksBroken = 0;
         // Loop through rows left to right scanning horizontally for consecutive filled chains
@@ -296,7 +296,7 @@ partial class Game : ComponentBase
                         // traverse this chain from chainStart to chainEnd
                         for (var k = chainStart.GetValueOrDefault(); k < chainEnd; k++)
                         {
-                            // and mark any cels within that number == consecutiveChainLength as scored
+                            // and mark any cells within that number == consecutiveChainLength as scored
                             if (Cells[k, j].Number == consecutiveChainLength)
                             {
                                 Cells[k, j].Scored = true;

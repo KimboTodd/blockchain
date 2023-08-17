@@ -3,7 +3,7 @@
 namespace Blockchain.Shared;
 
 [DebuggerDisplay("Row: {Row}, Column: {Column} Number: {Number}")]
-partial class Link : ComponentBase
+public partial class Link : ComponentBase
 {
     public Link()
     {
