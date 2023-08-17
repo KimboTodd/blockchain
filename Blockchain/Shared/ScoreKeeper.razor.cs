@@ -1,33 +1,36 @@
-﻿namespace Blockchain.Shared;
+namespace Blockchain.Shared;
 
 partial class ScoreKeeper : ComponentBase
 {
-    private bool _IsPlaying;
+    private GameState _gameState;
 
-    private List<int> _LastLinksBroken = new();
+    private List<int>? _LastLinksBroken;
 
     private bool comboAnimation = false;
 
     [Parameter]
-    public bool IsGameOver { get; set; }
-
-    [Parameter]
-    public bool IsPlaying
+    public GameState gameState
     {
-        get => _IsPlaying;
+        get => _gameState;
         set
         {
-            if (value == true)
+            if (value != _gameState)
             {
-                Score = 0;
-            }
+                if (value == GameState.Started)
+                {
+                    Score = 0;
+                    _LastLinksBroken = new List<int>();
+                }
 
-            _IsPlaying = value;
+                _gameState = value;
+            }
         }
     }
 
-    public async Task OnLinksBroken(int linksBroken)
+    public async Task OnLinksBrokenAsync(int linksBroken)
     {
+        _ = _LastLinksBroken ?? throw new Exception(nameof(_LastLinksBroken) + " is null, but should not be");
+
         if (linksBroken == 0)
         {
             _LastLinksBroken.Clear();

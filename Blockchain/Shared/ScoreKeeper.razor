@@ -1,20 +1,23 @@
 ﻿@namespace Blockchain.Shared
 
-@if (IsGameOver)
+@switch (gameState)
 {
-    <h1>Game Over</h1>
-}
-else if (IsPlaying)
-{
-    <h1>Score: @Score</h1>
-}
+    case GameState.Started:
+        <h1>Score: @Score</h1>
 
-@if (comboAnimation)
-{
-    <h1>Combo!</h1>
-}
+        @if (comboAnimation)
+        {
+            <h1>Combo!</h1>
+        }
+        break;
 
-@foreach (var linkBroken in _LastLinksBroken)
-{
-    <h3>@linkBroken</h3>
+    case GameState.NotStarted:
+        break;
+
+    case GameState.GameOver:
+        <h5>Game Over</h5>
+        break;
+
+    default:
+        throw new ArgumentOutOfRangeException();
 }

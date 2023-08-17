@@ -1,20 +1,18 @@
-﻿namespace Blockchain.Shared;
+namespace Blockchain.Shared;
 
 partial class Game : ComponentBase
 {
-    protected ElementReference gameBoardDiv;
+    private ElementReference gameBoardDiv;
 
     private ScoreKeeper scoreKeeper;
 
-    public int TotalLinks { get; set; }
+    private int TotalLinks { get; set; }
 
     private int? NextNumber { get; set; }
 
     private bool droppingAnimation { get; set; }
 
-    private bool IsPlaying { get; set; } = false;
-
-    private bool IsGameOver { get; set; } = false;
+    private GameState gameState { get; set; } = GameState.NotStarted;
 
     private Link? CurrentLink { get; set; }
 
@@ -28,12 +26,11 @@ partial class Game : ComponentBase
 
     private async Task Start()
     {
-        IsPlaying = true;
-        IsGameOver = false;
+        gameState = GameState.Started;
         NextNumber = GenerateNumber();
 
         //Focus the browser on the grid board div
-        gameBoardDiv.FocusAsync();
+        await gameBoardDiv.FocusAsync();
 
         GameLoop();
     }
@@ -56,8 +53,7 @@ partial class Game : ComponentBase
                     if (i == Cells.GetLength(0) && Cells[i, j] is not null)
                     {
                         // in the first row, if anything is not null, game over
-                        IsGameOver = true;
-                        IsPlaying = false;
+                        gameState = GameState.GameOver;
                         break;
                     }
 
@@ -88,7 +84,7 @@ partial class Game : ComponentBase
 
     private async Task KeyDown(KeyboardEventArgs e)
     {
-        if (IsPlaying is false || CurrentLink is null)
+        if (gameState != GameState.Started || CurrentLink is null)
         {
             return;
         }
@@ -131,7 +127,7 @@ partial class Game : ComponentBase
 
     private async Task handleDropAsync()
     {
-        if (IsPlaying is false || CurrentLink is null)
+        if (gameState != GameState.Started || CurrentLink is null)
         {
             return;
         }
@@ -195,14 +191,14 @@ partial class Game : ComponentBase
 
     private async Task dropCurrentLinkAsync(Link current)
     {
-        if (IsPlaying is false || CurrentLink is null)
+        if (gameState != GameState.Started || CurrentLink is null)
         {
             return;
         }
 
         if (Cells[6, CurrentLink.Column] is not null)
         {
-            IsGameOver = true;
+            gameState = GameState.GameOver;
             return;
         }
 
@@ -315,7 +311,7 @@ partial class Game : ComponentBase
             }
         }
 
-        scoreKeeper.OnLinksBroken(linksBroken);
+        scoreKeeper.OnLinksBrokenAsync(linksBroken);
         return linksBroken > 0;
     }
 }
