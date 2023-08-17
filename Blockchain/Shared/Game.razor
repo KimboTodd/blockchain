@@ -29,7 +29,7 @@
                 }
             </section>
 
-            <section class="basis-1/2 flex flex-col justify-between lg:px-10 px-4 w-full">
+            <section class="basis-1/2 flex flex-col lg:px-10 px-4 w-full">
                 @if (GameState == GameState.GameOver)
                 {
                     <Display Text="Game Over"/>
@@ -39,10 +39,10 @@
 
                 @if (GameState == GameState.Started)
                 {
-                    var currentLinkText = $"Current: {CurrentLink?.DisplayNumber}";
+                    var currentLinkText = $"Current Link: {CurrentLink?.DisplayNumber}";
                     <Display Text="@currentLinkText"/>
 
-                    var nextLinkText = $"next: {NextNumber}";
+                    var nextLinkText = $"Next Link: {NextNumber}";
                     <Display Text="@nextLinkText"/>
                 }
 
